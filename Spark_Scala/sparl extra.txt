@@ -1,0 +1,679 @@
+https://drive.google.com/drive/folders/1TgJFdqRHRonC7hlJzbsYC6xeTjumUZ4i
+scala-sdk-2.13.5
+2021.1.18
+
+
+For ducumentation help in python shift+tab
+ctrl+/ for mulpliple commenting 
+
+import file from local to spark 
+val myrdd1 = textFile("D:\\Salaries.csv")
+
+myrdd1.collect
+myrdd1.take(5)
+
+myrdd1.saveAstextFile("D:\Salaries")
+
+============================================================
+val rdd1 = sc.textFile("D:\\Salaries.csv")
+ rdd1.collect
+scala> val mapping = rdd1.map(x => x.split)
+scala> val mapping = rdd1.map(x => x.split(","))
+scala> mapping.take(3)
+
+
+
+
+
+
+How to get log file
+======================
+get application id from scala by writting spark-shell in web console
+
+paste it on web console 
+yarn logs -applicationId application_1608530820093_26906
+
+and paste it 
+yarn logs -applicationId application_1608530820093_26906 > app.txt
+
+now app.txt file got created in cloudera file or in local linux window
+
+now we can download from ftp
+
+Revise RDD:-
+=============
+
+val rdd = sc.parallelize(Array(1,2,3,4,5,6,7,8,9))
+
+
+
+How to create RDD: this is one kind of variable that store data that is stored in memory
+
+1. val rdd = sc.textFile("/user/patelbhagya1709gmail/applestore/apple-sales")
+2. rdd.collect // it takes all data
+3. rdd.take(5)
+4. val rdd1 = rdd.map(x => x.split(","))
+5. val rdd2 = rdd1.map(x => (x(7),1))
+6. val rdd3 = rdd2.reduceByKey((a,b) => (a+b))
+7. rdd3.collect
+8. rdd3.toDebugString
+output 
+res6: String =
+(2) ShuffledRDD[17] at reduceByKey at <console>:25 []
+ +-(2) MapPartitionsRDD[16] at map at <console>:25 []
+    |  MapPartitionsRDD[13] at map at <console>:25 []
+    |  /user/patelbhagya1709gmail/applestore/apple-sales.csv MapPartitionsRDD[12] at textFile at <console>:24 []
+    |  /user/patelbhagya1709gmail/applestore/apple-sales.csv HadoopRDD[11] at textFile at <console>:24 []
+
+9. rdd2.persist
+10. val rdd3 = rdd2.reduceByKey((a,b) => (a+b))
+11. rdd3.toDebugString
+res10: String =
+(2) ShuffledRDD[18] at reduceByKey at <console>:25 []
+ +-(2) MapPartitionsRDD[16] at map at <console>:25 []
+    |      CachedPartitions: 2; MemorySize: 82.9 KB; ExternalBlockStoreSize: 0.0 B; DiskSize: 0.0 B
+    |  MapPartitionsRDD[13] at map at <console>:25 []
+    |  /user/patelbhagya1709gmail/applestore/apple-sales.csv MapPartitionsRDD[12] at textFile at <console>:24 []
+    |  /user/patelbhagya1709gmail/applestore/apple-sales.csv HadoopRDD[11] at textFile at <console>:24 []
+12. :history
+
+now create rdd through parallalize 
+val rdd = sc.parallelize(List(1,2,3,4,5,6,7,8,9))
+
+or through existing rdd
+
+
+Practise Project on rd
+======================
+scala> val bus = sc.textFile("C:\\Users\\LENOVO\\Desktop\\Simplilearn\\haddep1\\project\\9_bus-breakdown-and-delays_case_study.csv")
+val bus1 = sc.textFile("/user/patelbhagya1709gmail/spark/9_bus-breakdown-and-delays_case_study")
+val bus = spark.sparkContext.textFile("C:\\Users\\LENOVO\\Desktop\\Simplilearn\\haddep1\\project\\9_bus-breakdown-and-delays_case_study.csv") 
+================================================================================================================================================================
+
+
+
+Operation in dataset:-
+========================
+val bus = spark.read.option("header" ,"true").csv("/user/patelbhagya1709gmail/spark/9_bus-breakdown-and-delays_case_study.csv")
+1. Most common reasons for either a delay or breaking down of the bus
+ val two = bus.groupBy("Reason").count().orderBy('count.desc).limit(5).show()
+
+2.Top five route numbers where the bus was either delayed or broke down 
+val three = bus.select("").filter('Reason === "Mechanical Problem" && 'Reason === "Delayed by School").limit(5).show()
+val four = bus.groupBy("Route_Number").count().orderBy('count.desc).filter('Reason === "Mechanical Problem" && 'Reason === "Delayed by School").limit(5).show()
+val four = bus.groupBy("Route_Number").count().orderBy('count.desc).show()
+val four = bus.groupBy("Route_Number", "Reason").count().orderBy('count.desc).show()
+
+val five = bus.groupBy("Route_Number", "Reason").count().orderBy('count.desc).filter('Reason === "Mechanical Problem" && 'Reason === "Delayed by School").limit(5).show()
+
+val five = four.select("Route_Number", "Reason").orderBy('count.desc).filter('Reason === "Mechanical Problem" && 'Reason === "Delayed by School").limit(5).show()
+
+four.select("Route_Number").filter('Reason === "Mechanical Problem").show
+
+scala> val myspark = spark.read.csv("/user/patelbhagya1709gmail/applestore/apple-sales.csv")    \\Data frame
+scala> val myspark = spark.read.option("header" ,"true").csv("/user/patelbhagya1709gmail/applestore/apple-sales.csv")
+scala> val myrdd = spark.sparkContext.textFile("/user/patelbhagya1709gmail/applestore/apple-sales.csv")    \\rdd
+myspark.schema  or myspark.printSchema
+scala> myspark.select("Country").show
+scala> myspark.select("Country").filter('Country === "India").show
+scala> myspark.select("Country").filter(col("Country") === "India").show
+scala> myspark.select("State").limit(2).show
+myspark.limit(2).show
+myspark.selectExpr("cast(price as int)price").agg(min('price)).show   \\here we need to cast price as int
+myspark.selectExpr("cast(price as int)price").agg(min('price),max('price),avg('price)).show
+myspark.selectExpr("cast(price as int)price").agg(min("price"),max("price"),avg("price")).show
+myspark.select("Country").groupBy("Country").count.show
+myspark.select("Country").groupBy("Country").count.orderBy('count.desc).show
+
+# Through rdd select options
+val mydf = myspark.select("Country").filter('Country === "India")
+mydf.show
+val mydf1 = myspark.select("Country", "Price").filter('Country === "India")
+mydf1.show
+val mydf2 = myspark.filter('Country === "India")
+mydf2.show
+
+
+
+  
+RDD creation using parallelize
+=================================
+val mysql = sql("select * from patelbhagya1709gmail.com_price1")
+mysql.show
+cd /etc/spark/conf   \\to config file
+
+#val rdd1 = sc.parallelize(Seq((1,10,100),(2,20,2000),(3,30,300),(4,40,4000))).toDF("custid","paymentid","amout")
+#rdd1.select("paymentid").show
+
+val rdd2 = sc.parallelize(Seq((1, "john"),(3, "mohan"),(5, "radhe"))).toDF("custid", "custname")
+rdd2.show
+
+
+
+joins
+======
+val join1 = rdd1.join(rdd2, "custid")
+val innerjoin = rdd1.join(rdd2, Seq("custid"), "inner")
+
+
+
+
+# Create a view for dataset and use it
+=======================================
+
+val myspark = spark.read.option("header" ,"true").csv("/user/patelbhagya1709gmail/applestore/apple-sales.csv")
+myspark.createOrReplaceTempView("apple")
+sql("select * from apple where Country = 'India'").show
+sql("select Name, City, State from apple where Country = 'India'").show
+sql("select Country, count (*) as shipments from apple group by Country order by shipments desc").show
+
+
+
+
+
+
+# importing multiple files from folder
+second = sc.textFile("/user/patelbhagya1709gmail/applestore//*txt")
+
+
+Scala command
+def MaxOfTwo ( x: Int , y:Int) :Int =  {
+if (x > y)
+x
+else 
+y
+}
+
+
+
+##################################################################################################################################################################3
+BOOK:-
+
+scala:-
+val df = spark.read.text("/user/patelbhagya1709gmail/applestore/basicinfo.txt").repartition(8)
+df.rdd.partitions.size
+
+python
+df = spark.read.text("/user/patelbhagya1709gmail/applestore/basicinfo.txt").repartition(8)
+df.rdd.getNumPartitions()
+or
+df = spark.range(0, 10000, 1, 8)
+print(df.rdd.getNumPartitions())
+
+
+-----------------------------------------------------------------------------------------------------------------
+scala
+val df= spark.read.text("/user/patelbhagya1709gmail/applestore/basicinfo.txt")
+df.show
+df.show(false)
+df.show(10,false) or df.show(10)
+df.count()
+	
+
+python:-
+
+df= spark.read.text("/user/patelbhagya1709gmail/applestore/basicinfo.txt")
+df.show(10) or df.show(10, truncate = False)
+df.count()
+-------------------------------------------------------------------------------------------------------------------
+
+scala:- 
+val filtered = df.filter(col("value").contains("is"))
+filtered.count()
+
+python:- 
+filtered = df.filter(df.value.contains("is"))
+filtered.count()
+-------------------------------------------------------------------------------------------------------------------
+
+myspark.selectExpr("Country", "State", "City", "cast(Price as int)Price").groupBy("Country", "State").agg(min('Price).alias("minprice"))
+myspark.selectExpr("Country", "State","cast(Price as int)Price").groupBy("Country", "State").agg(min('Price), avg('Price),max('Price)).show
+myspark.selectExpr("Country", "State", "City", "cast(Price as int)Price").groupBy("Country", "State").agg(min('Price)).show
+
+myspark.selectExpr("Country", "State","cast(Price as int)Price").groupBy("Country", "State").agg(min('Price), avg('Price),max('Price).alias("maxprice")).orderBy('maxprice.desc).show
+
+df1.select(Distinct("Country")).show()
+df1select("Payment_Type").where(col("Payment_Type").isNotNull).agg(df1(countDistinct("Payment_Type"))).show()
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# for particular State details:-
+
+myspark.selectExpr("Country","State","cast(Price as int)Price").filter('Country === "United States").groupBy("State").agg(min('Price).alias("minprice"),max('price)).show
+
+myspark.selectExpr("Country","State","cast(Price as int)Price").filter('Country === "United States").groupBy("State").agg(min('Price).alias("minprice"),max('price).alias("maxprice")).orderBy('maxprice.desc).show
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+myspark.selectExpr("City","cast(Price as int)Price").filter('State === "VA").groupBy("City").agg(min('Price)).show
+myspark.selectExpr("City","cast(Price as int)Price").filter('State =!= "VA").groupBy("City").agg(min('Price)).show
+myspark.selectExpr("Country", "State","City","cast(Price as int)Price").filter('Country === "United States").groupBy("Country", "State","City").agg(min('Price)).show
+myspark.selectExpr("Country", "State","City","cast(Price as int)Price").filter('Country === "United States").groupBy("Country", "State","City").agg(min('Price).alias("minprice")).orderBy('minprice.desc).show
+
+scala> myspark.selectExpr("Country", "State","City","cast(Price as int)Price").filter('Country === "United States").groupBy("Country", "State","City"
+).agg(min('Price).alias("minprice")).orderBy(col("minprice").desc).show
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+val myspark = spark.read.option("header" ,"true").csv("/user/patelbhagya1709gmail/applestore/apple-sales.csv")
+myspark.show(5)
+myspark.select(expr("price * 2")).show(5)
+myspark.selectExpr("price * 2").show(5)
+myspark.select(col("price") * 2).show(5)
+myspark.select(expr("price * 2").alias("total")).show(5)
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+myspark.withColumn("aboveprice", (expr("price>3000"))).show(10)
+myspark.selectExpr("price>3000").show(6)
+
+myspark.selectExpr("Country", "State", "City", "cast(price as int)price").filter('price >3000).show(5)
+myspark.select($"price" *2 ).show(5)
+myspark.select(expr($"price">4000).alias("maxprice")).orderBy('maxprice.desc).show(10)
+myspark.select("price").filter('price >  4000).show(10)
+
+val sf_fire_file = "/databricks-datasets/learning-spark-v2/sf-fire/sf-fire-calls.csv"
+fire_df = spark.read.csv(sf_fire_file, header=True, schema=fire_schema)
+
+val sampleDF = spark.read.option("samplingRatio", 0.001).option("header", true).csv("""/databricks-datasets/learning-spark-v2/sf-fire/sf-fire-calls.csv""")
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+How to save file as parquet file and read again
+=================================================
+myspark.write.parquet("/user/patelbhagya1709gmail/applestore/abc.parquet")
+myspark.write.format("parquet").save("/user/patelbhagya1709gmail/applestore/abc12.parquet")
+
+val parqfile = spark.read.parquet("/user/patelbhagya1709gmail/applestore/abc12.parquet")
+val parqfile = spark.read.parquet("/user/patelbhagya1709gmail/Files/abc12.parquet").createOrReplaceTempView("parq")
+// Read in the parquet file created above
+// Parquet files are self-describing so the schema is preserved
+// The result of loading a Parquet file is also a DataFrame
+
+val parqfile = spark.read.parquet("abc12.parquet")
+
+//Parquet files can also be used to create a temporary view and then used in SQL statements
+val one = spark.sql("select * from parqsql")
+one.show
+spark.sql("select City, Price from parqsql where price between 3000 and 4000").show(5)
+
+df2.map(a => a(0)).show 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Uses od Distinct
+====================
+\\find no of distinct value form a column
+myspark.select("Payment_Type").where(col("Payment_Type").isNotNull).agg(countDistinct("Payment_Type")).show
+myspark.select("Payment_Type").where('Payment_Type.isNotNull).agg(countDistinct("Payment_Type")).show
+
+\\find distinct value form a column
+myspark.select("payment_type").where('payment_type.isNotNull).distinct().show
+
+\\ count frequency of categorical variable
+myspark.groupBy("payment_type").count().show
+myspark.groupBy("Country").count().show(10)
+myspark.groupBy("Country").count().orderBy('count.desc).show(10)
+
+#rename
+===========                              old         new
+val rname = myspark.withColumnRenamed("Country","Countryname")
+val times = myspark.withColumn("newdate", to_timestamp(col("Transaction_date"),"mm/dd/yyyy"))
+val times = myspark.withColumn("newdate", to_timestamp(col("Transaction_date"),"mm/dd/yyyy")).drop("Transaction_date").show(5)
+
+Time Format change:-
+========================
+times.select(year($"newdate")).distinct().show
+
+ROW:=-
+=======
+Row class extends the tuple hence it takes variable number of arguments, Row() is used to create the row object. Once the row object created, we can retrieve the data from Row using index similar to tuple.
+import org.apache.spark.sql.Row
+val row = Row(350, true, "Learning Spark 2E", null)
+python:-
+from pyspark.sql import Row
+row = Row(350, True, "Learning Spark 2E", None)
+
+
+
+IOT:-internet of things
+===========================
+val ds = spark.read.json("/databricks-datasets/learning-spark-v2/iot-devices/iot_devices.json").as[DeviceIoTData]
+
+Practise Project:-
+====================
+val df = spark.read.format("csv").option("inferSchema","true").option("header","true").load("/user/patelbhagya1709gmail/hflights.csv")
+val df = spark.read.format("csv").option("inferSchema", "true").option("header", "true").load(csvFile)
+val df = spark.read.option("header",true).csv("/user/patelbhagya1709gmail/hflights.csv")
+
+
+
+
+
+1. First, we’ll find all flights whose distance is greater than 1,000 miles:
+("select UniqueCarrier, origin, dest, Distance from flight where Distance > 1000 order by distance desc")
+
+find all flights between San Francisco (SFO) and Chicago (ORD) with at least a two-hour delay:
+spark.sql("select UniqueCarrier, origin,dest,DepDelay from flight where DepDelay > 60 AND ArrDelay >60 AND origin = 'SFO' AND dest = 'ORD' order by DepDelay desc").show
+
+spark.sql("""SELECT delay, origin, destination,
+CASE
+WHEN delay > 360 THEN 'Very Long Delays'
+WHEN delay > 120 AND delay < 360 THEN 'Long Delays'
+WHEN delay > 60 AND delay < 120 THEN 'Short Delays'
+WHEN delay > 0 and delay < 60 THEN 'Tolerable Delays'
+WHEN delay = 0 THEN 'No Delays'
+ELSE 'Early'
+END AS Flight_Delays
+FROM us_delay_flights_tbl
+ORDER BY origin, delay DESC""").show(10)
+
+
+
+How to Create database in spark using sql:-
+================================================
+spark.sql("create DATABASE firstdb") 
+spark.sql("use firstdb")
+
+
+spark.sql("CREATE TABLE flight (date STRING, delay INT,distance INT, origin STRING, destination STRING)")
+spark.sql("Create table restuarant (low INT, medium INT, High INT)")
+
+val csv_file = "/user/patelbhagya1709gmail/applestore/restuarant1.csv"
+val schemas = "low INT, medium INT, High INT"
+resto = spark.read.csv(csv_file, schema = schemas)
+flights_df = spark.read.csv(csv_file, schema=schema)
+
+
+
+creating table using python:-
+=================================
+csv_file = "/databricks-datasets/learning-spark-v2/flights/departuredelays.csv"
+# Schema as defined in the preceding example
+schema="date STRING, delay INT, distance INT, origin STRING, destination STRING"
+flights_df = spark.read.csv(csv_file, schema=schema)
+flights_df.write.saveAsTable("managed_us_delay_flights_tbl")
+
+chapter 4
+======================================================================================================================================================================
+
+
+Creating Views:-
+=====================
+In addition to creating tables, Spark can create views on top of existing tables. Views
+can be global (visible across all SparkSessions on a given cluster) or session-scoped
+(visible only to a single SparkSession), and they are temporary: they disappear after
+your Spark application terminates.
+
+
+
+
+CREATE OR REPLACE GLOBAL TEMP VIEW us_origin_airport_SFO_global_tmp_view AS SELECT date, delay, origin, destination from us_delay_flights_tbl WHERE origin = 'SFO';
+sparl.sql("CREATE OR REPLACE GLOBAL TEMP VIEW flig AS SELECT UniqueCarrier, FlightNum, ArrDelay, DepDelay, Origin,Dest, Distance WHERE origin = 'IAH'")
+spark.sql("SELECT UniqueCarrier, FlightNum, ArrDelay, DepDelay, Origin,Dest, Distance WHERE origin = 'IAH'").createOrReplaceGlobalTempView("flight1")
+df.select("UniqueCarrier", "FlightNum", "ArrDelay", "DepDelay", "Origin","Dest", "Distance").filter('origin === "IAH").createOrReplaceTempView("flight1")
+
+
+
+
+or while creating table wee can create view:-
+===========================================
+spark.read.option("header" ,"true").csv("/user/patelbhagya1709gmail/applestore/apple-sales.csv").createOrReplaceTempView("fligh")
+
+
+val df = spark.read.format("parquet").load(file)
+// Use Parquet; you can omit format("parquet") if you wish as it's the default
+val df2 = spark.read.load(file)  // by defalut parquet file
+
+
+#parquet:-
+================
+val df = spark.read.option("header" ,"true").csv("/user/patelbhagya1709gmail/applestore/apple-sales.csv")
+df.write.format("json").mode("overwrite").save("/user/patelbhagya1709gmail/applestore/df.json")
+val df4 = spark.read.format("json").load("/user/patelbhagya1709gmail/applestore/df.json")
+spark.sql("select * from df4").show
+df4.write.format("parquet").mode("overwrite").option("compression", "snappy").save("/user/patelbhagya1709gmail/applestore/parq123")
+
+
+#json:-
+===========
+df.write.format("parquet").save("/user/patelbhagya1709gmail/applestore/abc12.parquet")
+val parqfile = spark.read.parquet("/user/patelbhagya1709gmail/applestore/abc12.parquet").createOrReplaceTempView("parqf")
+spark.sql("select * from parqf").show
+
+
+AVRO:-
+=========
+df4.write.format("avro").save("/user/patelbhagya1709gmail/applestore/avrof")
+val df = spark.read.format("avro").load("/user/patelbhagya1709gmail/applestore/avrof")
+df.show(false)
+
+
+OCR:-
+======
+df.write.format("orc").mode("overwrite").option("compression", "snappy").save("/user/patelbhagya1709gmail/applestore/ocrfile")
+val file = "/user/patelbhagya1709gmail/applestore/ocrfile"
+val df = spark.read.format("orc").load(file)
+df.show(10, false)
+
+image file:-
+================
+val imageDir = "/databricks-datasets/learning-spark-v2/cctvVideos/train_images/"
+val imagesDF = spark.read.format("image").load(imageDir)
+
+
+Create sql table and insert data into that:-
+============================================
+spark.sql("create table people(name STRING, Age INT)")
+spark.sql("insert into people1 values("bhawana", "28")")
+spark-sql> INSERT INTO people1 VALUES ("Michael", NULL);
+spark.sql("INSERT INTO people1 VALUES ("Michael", NULL)")
+
+
+Using sql we can store and access data from warehouse :- /user/patelbhagya1709gmail/warehouse/databasename
+spark.sql("use patelbhagya1709gmail")
+spark.sql("show tables").show
+spark.sql("CREATE TABLE people (name STRING, age int)")
+
+spark.sql("INSERT INTO people VALUES('Andy', 25)")
+spark.sql("insert into people values ('France',30)")
+spark.sql("insert into people values ('bhawana',30)")
+spark.sql("select * from people").show
+spark.sql("SELECT * FROM people WHERE age > 25").show
+
+Schema:-
+==============
+structype:- schema
+structfield:- column name
+nullable or not:- boolean value
+
+
+df.queryExecution
+https://databricks.com/blog/2015/04/28/project-tungsten-bringing-spark-closer-to-bare-metal.html
+
+
+
+
+SHARED VARIABLE:=
+===================
+Broadcast:- it send variable to all executer before starting execution 
+Accumlator:- 
+
+
+
+scala> spark.read.format("json").load("/user/patelbhagya1709gmail/json/temperatures.json").createOrReplaceTempView("jfile")
+spark.udf.register("fname",(degcel:Double) => ((degcel * 9.0/ 5.0)+32))
+spark.sql("select city, fname(avgHigh) as avgHigh, fname(avgLow) as avgLow from jfile").show 
+or:
+====
+val a = udf((degcel: Double) => ((degcel * 9.0/5.0)+32))
+spark.sql("select city, a('avgHigh) as avgHigh, a('avgLow) as avgLow from jfile").show
+jfile.withColumn("avglowf",a('avgLow)).withColumn("avgHighf", a('avgHigh)).select("city", "avglowf","avgHighf").show	 
+or
+====
+jfile.withColumn("avgLowF", a(col("avgLow"))).withColumn("avgHighF",a(col("avgHigh"))).select ("city","avgLowF","avgHighF").show
+
+=======================================================================================================================================================================
+
+Dataset:- CompileTime, 		easily handled,			schema known already, 					   strongly Types
+
+Dataframe:- RunTime, 	expensive to resolve error, 	we can know schema in actual run time envirnment,   			untyped
+
+=======================================================================================================================================================================
+
+Spark Hive ingression:-
+=========================
+bhagya_bdhs1.hivef1
+
+CREATE TABLE hivef1(driverId int, 
+name STRING, 
+ssn BIGINT, 
+location1 STRING, 
+certified STRING, 
+wageplan STRING) 
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' TBLPROPERTIES("skip,header.line.count"= "1"); 
+
+Load DATA INPATH '/user/patelbhagya1709gmail/drivers.csv' OVERWRITE INTO TABLE hivef1;
+
+Sprk-hive Queries:-
+=======================
+spark.sql("Select * from hivef1").show
+spark.sql("Select * from hivef1 where certified = 'Y'").show
+spark.sql("Select * from hivef1 where driverId in (10,11,14,16,32)").show
+spark.sql("select * from hivef1 sort by ssn asc").show
+spark.sql("Select d.driverId,d.name  from hivef1 d join timesheet t ON (d.driverId=t.driverId)")
+df.write.format("parquet").save("/user/patelbhagya1709gmail/applestore/hivetrans")
+if wxist file then we can =  mode("overwrite")
+df.write.format("parquet").mode("overwrite").save("/user/patelbhagya1709gmail/applestore/hivetrans")
+
+
+we can create hdfs table external in hive so that anybody can view
+=====================================================================
+CREATE EXTERNAL TABLE hiveexternal(driverId int, 
+name STRING, 
+ssn BIGINT, 
+location1 STRING, 
+certified STRING, 
+wageplan STRING)
+STORED AS PARQUET
+LOCATION '/user/patelbhagya1709gmail/applestore/hivetrans/'
+
+
+
+how through spark sql accessing hive tables:-
+=================================================
+spark.sql("select * from bhagya_bdhs1.hivef1").show
+
+####spark.sql("select avgHigh, transform(avgHigh, t => t>10) as high from jfile").show
+
+spark.sql("SELECT * FROM airports_na LIMIT 10").show()
+
+
+Create Dataset
+=================
+case class Person(name: String, age: Long)
+	
+caseClassDS.show()
+
+
+
+Converting DataFrames to Datasets:-
+======================================
+
+val path = "examples/src/main/resources/people.json"
+val peopleDS = spark.read.json(path).as[Person]
+peopleDS.show()
+
+
+
+  case class temp1 (avgHigh: Double, avgLow: Double, city: String)
+    val temp2 = spark.read
+    .json("C:/Users/LENOVO/Desktop/Simplilearn/dataset/json/temperatures.json")
+    .as[temp1]
+
+
+
+case class temp (city: String, avgHigh: Double, avgLow: Double)
+val temp = spark.read.json("/user/patelbhagya1709gmail/json/temperatures.json").as[temp]
+spark.read.json("/user/patelbhagya1709gmail/json/temperatures.json").as[temp].createOrReplaceTempView("jfile")
+
+Operation:-
+temp.filter('avgHigh > 10).show
+temp.filter('city === "Montreal").show
+
+Viewing and Setting Apache Spark Configurations:-
+There are three ways you can get and set Spark properties. The first is through a set of configuration files. In your deployment’s $SPARK_HOME directory (where you installed
+Spark),
+
+
+Data sharing is slow in MapReduce due to replication, serialization, and disk IO. Most of the Hadoop applications, they spend more than 90% of the time doing HDFS read-write operations.
+
+Recognizing this problem, researchers developed a specialized framework called Apache Spark. The key idea of spark is Resilient Distributed Datasets (RDD); it supports in-memory processing computation. This means, it stores the state of memory as an object across the jobs and the object is sharable between those jobs. Data sharing in memory is 10 to 100 times faster than network and Disk.
+
+
+window operation
+
+
+
+MLlib:- 
+==========
+val df = spark.read.option("header", "true").option("inferSchema","true").csv("/user/patelbhagya1709gmail/Files/11_diamonds_case_study.csv")
+val df1 = df.drop('_c0)  // to drop column
+val df2 = df1.select(('price).as("label"),'carat, 'cut, 'color, 'clarity, 'depth, 'table, 'x, 'y, 'z)
+or:-
+val df2 = df1.select(df1("price").as("label"), $"carat", $"cut", $"color", $"clarity", $"depth", $"table", $"x", $"y", $"z")
+String Indexer - Convert String into Numbers:-
+
+
+
+val cutIndexer = new StringIndexer().setInputCol("cut").setOutputCol("cutIndex");
+val colorIndexer = new StringIndexer().setInputCol("color").setOutputCol("colorIndex");
+val clarityIndexer = new StringIndexer().setInputCol("clarity").setOutputCol("clarityIndex")
+val indexer = Array(cutIndexer,colorIndexer,clarityIndexer)
+
+
+val cutind = new StringIndexer().setInputCol("cut").setOutputCol("cutIndexer");
+val colorInd = new StringIndexer().setInputCol("color").setOutputCol("colorInd");
+val clarityInd = new StringIndexer().setInputCol("clarity").setOutputCol("clarityInd")
+val indexer = Array(cutind,colorInd,clarityInd)
+
+
+Multinode cluster setting
+1. install java
+2. set user variable and path 
+3. Create a system user account on both master and slave systems to use the Hadoop installation.
+4. You have to edit hosts file in /etc/ folder on all nodes, specify the IP address of each system followed by their host names.
+# vi /etc/hosts
+enter the following lines in the /etc/hosts file.
+
+192.168.1.109 hadoop-master 
+192.168.1.145 hadoop-slave-1 
+192.168.56.1 hadoop-slave-2
+
+spark-submit:-
+===============
+spark-submit is a utility to submit your spark program (or job) to Spark clusters. ... spark-submit has some additional option to take your spark program (scala or python) as a bundle (jar/zip for python) or individual
+
+spark-submit --help
+pyspark --help
+spark-shell --help
+
+
+When we do a transformation on any RDD, it gives us a new RDD. But it does not start the execution of those transformations. The execution is performed only when an action is performed on the new RDD and gives us a final result.
+
+So once you perform any action on an RDD, Spark context gives your program to the driver.
+
+The driver creates the DAG (directed acyclic graph) or execution plan (job) for your program. Once the DAG is created, the driver divides this DAG into a number of stages. These stages are then divided into smaller tasks and all the tasks are given to the executors for execution.
+
+The Spark driver is responsible for converting a user program into units of physical execution called tasks. At a high level, all Spark programs follow the same structure. They create RDDs from some input, derive new RDDs from those using transformations, and perform actions to collect or save data. A Spark program implicitly creates a logical directed acyclic graph (DAG) of operations.
+
+When the driver runs, it converts this logical graph into a physical execution plan.
+
+
+Spark Program work flow:-
+=============================
+program ==> sparkcontext send program to driver in the form of jar or zip file ==> driver create DAG,JOB,ExecutionPlan ==> job convert into more than one stages ==> stages convert into more than one task ==> task is unit of work givin to the excutor ==> executer will execute the jar file
+
+Dag:- Directed Acyclic Graph 
+============================
+Complete start to end flow of spark application where it represent stages is in the form of columns and tasks is in the form of rows 
+
+
+
+
+
+
+
