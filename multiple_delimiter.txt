@@ -1,0 +1,5 @@
+name ~| age ~| city
+azahar,ali ~| 45 ~| pune
+hina, khan ~| 55 ~| ahme
+anmol, patel ~| 70 ~| udna
+bhagya, patel ~| 30 ~| us

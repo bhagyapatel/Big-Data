@@ -1,0 +1,5 @@
+id|name|education
+1|hari|mba,bba
+2|lila|bca,mca
+3|hina
+4|naman|bba,mba,phd
